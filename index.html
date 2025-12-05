@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>井字棋 — 玩家對戰 + 多回合制</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+<div class="container">
+    <h1>井字棋</h1>
+
+    <div class="rounds">
+        <label for="roundSelect">選擇系列戰：</label>
+        <select id="roundSelect">
+            <option value="3">三戰兩勝</option>
+            <option value="5">五戰三勝</option>
+        </select>
+    </div>
+
+    <div class="status">
+        目前輪到：<strong id="turn">X</strong>
+    </div>
+    <div id="state"></div>
+
+    <div id="score" class="score">X：0 　O：0</div>
+
+    <div id="board" class="board"></div>
+
+    <div class="controls">
+        <button id="resetGame">重新開始此局</button>
+        <button id="resetAll">重置全部</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
