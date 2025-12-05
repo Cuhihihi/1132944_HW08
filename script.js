@@ -10,7 +10,7 @@ const resetAll = document.getElementById("resetAll");
 
 let cells = [];
 let board, current, active;
-let scoreX = 0, scoreO = 0;
+let scoreX = 0, scoreO = 0, drawCount = 0; // 新增平手統計
 let targetWins = 2; // 三戰兩勝（預設）
 
 const WIN_LINES = [
@@ -104,6 +104,7 @@ function endGame({winner,line}){
    if(winner==="X") scoreX++; else scoreO++;
  } else {
    stateEl.textContent = "平手";
+   drawCount++; // 累計平手次數
  }
 
  updateScore();
@@ -116,20 +117,22 @@ function endGame({winner,line}){
 
 // 更新分數
 function updateScore(){
- scoreEl.textContent = `X：${scoreX}　O：${scoreO}`;
+ scoreEl.textContent = `X：${scoreX}　O：${scoreO}　平手：${drawCount}`;
 }
 
 // 按鈕事件
-resetGame.onclick = ()=>init();
 resetAll.onclick = ()=>{
- scoreX=0; scoreO=0; updateScore(); init();
+ scoreX=0; scoreO=0; drawCount=0;
+ updateScore(); 
+ init();
 };
 
 // 系列戰選擇
 roundSel.onchange = ()=>{
  let total = Number(roundSel.value);
  targetWins = Math.floor(total/2)+1;  
- scoreX=0; scoreO=0; updateScore();
+ scoreX=0; scoreO=0; drawCount=0;
+ updateScore();
  init();
 };
 
