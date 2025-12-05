@@ -1,141 +1,107 @@
-console.log("JS loaded");
-
-const boardEl = document.getElementById("board");
-const turnEl = document.getElementById("turn");
-const stateEl = document.getElementById("state");
-const scoreEl = document.getElementById("score");
-const roundSel = document.getElementById("roundSelect");
-const resetGame = document.getElementById("resetGame");
-const resetAll = document.getElementById("resetAll");
-
-let cells = [];
-let board, current, active;
-let scoreX = 0, scoreO = 0, drawCount = 0; // 新增平手統計
-let targetWins = 2; // 三戰兩勝（預設）
-
-const WIN_LINES = [
- [0,1,2],[3,4,5],[6,7,8],
- [0,3,6],[1,4,7],[2,5,8],
- [0,4,8],[2,4,6]
-];
-
-// 創建棋盤
-function createBoard() {
-    boardEl.innerHTML = "";
-    cells = [];
-
-    for (let i = 0; i < 9; i++) {
-        const btn = document.createElement("button");
-        btn.className = "cell";
-        btn.dataset.idx = i;
-
-        // 使用 dataset 取得索引，消除 W083 警告
-        btn.addEventListener("click", function(e) {
-            const idx = parseInt(e.target.dataset.idx);
-            playerMove(idx);
-        });
-
-        cells.push(btn);
-        boardEl.append(btn);
-    }
+:root {
+  --bg: #ffd1d1;
+  --text: #9a1800;
+  --x: #b90000;
+  --o: #00a8be;
+  --win: #ffe200;
 }
 
-// 初始化
-function init(){
- board = Array(9).fill("");
- current = "X";
- active = true;
- cells.forEach(c=>{
-   c.textContent="";
-   c.className="cell";
-   c.disabled=false;
- });
- turnEl.textContent=current;
- stateEl.textContent="";
+body {
+  margin:0; 
+  font-family:'Noto Sans TC',sans-serif; 
+  background: var(--bg);
+  color:var(--text); 
+  display:grid; 
+  place-items:center; 
+  height:100vh;
+  overflow: hidden;
+  position: relative;
 }
 
-// 玩家移動
-function playerMove(idx){
- if(!active || board[idx]) return;
- place(idx);
+/* 背景動畫（甜點主題圖案） */
+body::before {
+  content:"";
+  position: absolute;
+  top:0; left:0; right:0; bottom:0;
+  background-image: url('https://img.ixintu.com/download/jpg/201910/b0cde1adc1fb9af5b08bd47412db7944.jpg!con'); /* 範例甜點圖案 */
+  background-size: cover;
+  background-repeat: repeat;
+  opacity: 0.3; /* 淡化圖案 */
+  animation: bgMove 20s linear infinite;
+  z-index: -1;
 }
 
-// 放置棋子
-function place(idx){
- if(!active) return;
- board[idx] = current;
- const c = cells[idx];
- c.textContent = current;
- c.classList.add(current.toLowerCase());
-
- const result = evaluate();
- if(result.finished){ 
-     endGame(result); 
- } else {
-     switchTurn();
- }
+@keyframes bgMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 1000px; }
 }
 
-// 切換玩家
-function switchTurn(){
- current = current==="X" ? "O" : "X";
- turnEl.textContent = current;
+.container {
+  width:min(720px,95%); 
+  text-align:center;
+  z-index: 1;
 }
 
-// 判斷勝負
-function evaluate(){
- for(const line of WIN_LINES){
-   const [a,b,c] = line;
-   if(board[a] && board[a]===board[b] && board[a]===board[c]){
-     return {finished:true, winner:board[a], line};
-   }
- }
- if(board.every(v=>v)) return {finished:true, winner:null};
- return {finished:false};
+/* 棋盤 */
+.board {
+  display:grid; 
+  grid-template-columns:repeat(3,1fr); 
+  gap:12px; 
+  width:min(400px,90%); 
+  margin:auto; 
+  padding:12px;
 }
 
-// 遊戲結束
-function endGame({winner,line}){
- active=false;
-
- if(winner){
-   stateEl.textContent = winner + " 勝利！";
-   line.forEach(i=> cells[i].classList.add("win"));
-   if(winner==="X") scoreX++; else scoreO++;
- } else {
-   stateEl.textContent = "平手";
-   drawCount++; // 累計平手次數
- }
-
- updateScore();
-
- if(scoreX===targetWins || scoreO===targetWins){
-   stateEl.textContent += " 🎉 系列戰結束！";
-   cells.forEach(c=>c.disabled=true);
- }
+/* 一般格子，背景上往下漸層 + 動畫 */
+.cell {
+  aspect-ratio:1; 
+  border-radius:10px; 
+  background: linear-gradient(to bottom, #b2b7ff, #121430);
+  border:1px solid rgba(255,255,255,0.1); 
+  font-size:48px; 
+  font-weight:800; 
+  display:grid; 
+  place-items:center; 
+  cursor:pointer; 
+  user-select:none;
+  line-height:1;
+  transition: background 0.3s ease;
+  animation: cellGradient 3s ease-in-out infinite alternate;
 }
 
-// 更新分數
-function updateScore(){
- scoreEl.textContent = `X：${scoreX}　O：${scoreO}　平手：${drawCount}`;
+/* 格子漸層動畫 */
+@keyframes cellGradient {
+  0% { background: linear-gradient(to bottom, #ffa6a6, #ffe9b7); }
+  50% { background: linear-gradient(to bottom, #ffa6a6, #ffe9b7); }
+  100% { background: linear-gradient(to bottom, #ffa6a6, #ffe9b7); }
 }
 
-// 按鈕事件
-resetAll.onclick = ()=>{
- scoreX=0; scoreO=0; drawCount=0;
- updateScore(); 
- init();
-};
+/* X 和 O 顏色 */
+.cell.x { color:var(--x); }
+.cell.o { color:var(--o); }
 
-// 系列戰選擇
-roundSel.onchange = ()=>{
- let total = Number(roundSel.value);
- targetWins = Math.floor(total/2)+1;  
- scoreX=0; scoreO=0; drawCount=0;
- updateScore();
- init();
-};
+/* 勝利格子 */
+.cell.win {
+  background: var(--win); /* 單色背景 */
+  /* 保留 X 或 O 顏色，不改文字顏色 */
+  animation: none; /* 停止漸層動畫 */
+}
 
-// 初始化棋盤
-createBoard();
-init();
+/* 控制按鈕與選單 */
+.controls, .rounds {
+  margin-top:16px;
+}
+
+button {
+  padding:8px 12px; 
+  border-radius:10px; 
+  border:0; 
+  cursor:pointer; 
+  background:#ffffff; 
+  color:var(--text);
+}
+
+.score {
+  margin-top:12px; 
+  font-size:18px;
+}
